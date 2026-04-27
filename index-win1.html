@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>WIN 1</title>
+
+<link rel="icon" href="back1.png">
+<link rel="stylesheet" href="style.css">
+
+<script src="https://unpkg.com/html5-qrcode"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
+
+<script>
+sessionStorage.setItem("role","petugas");
+sessionStorage.setItem("mode","normal");
+sessionStorage.setItem("wilayah","win1");
+</script>
+</head>
+
+<body>
+<a href="#" onclick="keluarAplikasi()" class="neon-exit-btn" id="tombolKeluar">
+    ⚡ KELUAR ⚡
+</a>
+
+<img src="boit.png" class="logo-header">
+<script>
+
+sessionStorage.setItem("role","petugas");
+sessionStorage.setItem("mode","normal");
+sessionStorage.setItem("wilayah","win1");
+
+/* ===== ANTI INSPECT ===== */
+
+document.addEventListener('contextmenu', function(e){
+    e.preventDefault();
+});
+
+document.onkeydown = function(e){
+
+    // F12
+    if(e.keyCode == 123){
+        return false;
+    }
+
+    // CTRL + SHIFT + I
+    if(e.ctrlKey && e.shiftKey && e.keyCode == 73){
+        return false;
+    }
+
+    // CTRL + SHIFT + J
+    if(e.ctrlKey && e.shiftKey && e.keyCode == 74){
+        return false;
+    }
+
+    // CTRL + U
+    if(e.ctrlKey && e.keyCode == 85){
+        return false;
+    }
+
+    // CTRL + SHIFT + C
+    if(e.ctrlKey && e.shiftKey && e.keyCode == 67){
+        return false;
+    }
+
+};
+
+
+document.onselectstart = function(e){
+
+    if(e.target.closest("#listKantong")){
+        return true;
+    }
+
+    return false;
+};
+
+
+(function(){
+
+function detectDevTools(){
+
+    const start = new Date();
+
+    debugger;
+
+    const end = new Date();
+
+    if(end - start > 100){
+
+        document.body.innerHTML =
+        "<h1 style='color:red;text-align:center;margin-top:100px;'>SECURITY BLOCKED</h1>";
+
+    }
+
+}
+
+setInterval(detectDevTools,1000);
+
+})();
+
+// ===== KLIK NOMOR KANTONG AUTO COPY =====
+document.addEventListener("click", function(e){
+
+    if(e.target.tagName === "TD" && e.target.parentElement.parentElement.id === "listKantong"){
+
+        var teks = e.target.innerText;
+
+        navigator.clipboard.writeText(teks).then(function(){
+
+            // efek notifikasi kecil
+            e.target.style.background = "#00c896";
+
+            setTimeout(function(){
+                e.target.style.background = "";
+            },500);
+
+        });
+
+    }
+
+});
+
+</script>
+<h2>WIN 1</h2>
+<h2>APLIKASI CEK KANTONG</h2>
+
+<!-- LOGIN TAB -->
+<div id="loginTabSection">
+    <h3>Login Sistem</h3>
+    <div class="tab-buttons">
+        
+        <button class="tab-btn" onclick="openTab('admin')">Admin</button>
+        <button class="tab-btn" onclick="openTab('petugas')">Petugas</button>
+    </div>
+
+    <!-- USER -->
+    <div class="tab-content" id="tab-user">
+        <input type="text" id="usernameUser" placeholder="Username User">
+        <input type="password" id="passwordUser" placeholder="Password User">
+        <button onclick="loginUser()">Login User</button>
+    </div>
+
+    <!-- ADMIN -->
+    <div class="tab-content" id="tab-admin">
+        <input type="text" id="usernameAdmin" placeholder="Username Admin">
+        <input type="password" id="passwordAdmin" placeholder="Password Admin">
+        <button onclick="loginAdmin()">Login Admin</button>
+    </div>
+
+    <!-- PETUGAS -->
+    <div class="tab-content" id="tab-petugas">
+        <input type="text" id="usernamePetugas" placeholder="Username Petugas">
+        <input type="password" id="passwordPetugas" placeholder="Password Petugas">
+        <button onclick="loginPetugas()">Login Petugas</button>
+    </div>
+</div>
+
+<!-- USER INFO & FORM -->
+<div id="userInfo" style="display:none;">
+    <span id="namaUser"></span>
+    <button onclick="logout()">Logout</button>
+    <button id="hapusSemuaBtn" onclick="hapusSemuaData()" style="display:none;">Hapus Semua Data</button>
+</div>
+
+    <!-- Admin Form -->
+    <div id="formAdmin" style="display:none; margin-top:15px;">
+      
+ 
+
+<input type="file" id="fileExcelAdmin" accept=".csv,.xlsx" style="display:none;">
+
+<h3 class="judul-upload">PILIH TARGET DATA</h3>
+<select id="targetUploadExcel">
+<option value="win1">DATA WIN1</option>
+<option value="win2">DATA WIN2</option>
+<option value="win3">DATA WIN3</option> <!-- 🔥 TAMBAHAN -->
+<option value="all">DATA WIN1, WIN2 & WIN3</option>
+</select>
+
+    <label for="fileExcelAdmin" class="neon-upload">
+        ⚡ PILIH FILE EXCEL ⚡
+    </label>
+
+    <button class="neon-upload-btn" onclick="uploadExcelAdmin()">
+        🚀 UPLOAD DATA
+    </button>
+
+    <!-- HAPUS PER JUDUL -->
+    <hr>
+   <h3>HAPUS DATA PER JUDUL</h3>
+
+<select id="targetHapusData" onchange="loadJudulAdmin()">
+<option value="win1">HAPUS DATA WIN1</option>
+<option value="win2">HAPUS DATA WIN2</option>
+<option value="win3">HAPUS DATA WIN3</option> <!-- 🔥 TAMBAHAN -->
+<option value="all">HAPUS DATA WIN1, WIN2 & WIN3</option>
+</select>
+
+<select id="hapusJudulDropdown"></select>
+
+<button onclick="hapusPerJudul()">❌ HAPUS DATA</button>
+
+</div>
+
+    <!-- Petugas Form -->
+	      <div id="formPetugas" style="display:none; margin-top:15px;">
+		  <h3>INPUT MANUAL</h3>
+        <input type="text" id="manualScanPetugas" placeholder="Input Manual No Kantong" oninput="autoScanManual()">
+        <button onclick="manualCheckPetugas()">Proses</button>
+    </div>
+</div>
+
+<!-- FORM KETERANGAN JUDUL -->
+<div id="infoJudulBox" style="display:none;">
+    <h3>TOTAL KANTONG PENGAJUAN</h3>
+    <div id="infoJudulText" 
+         style="
+            font-weight:600;
+            font-size:16px;
+            padding:15px;
+            border-radius:15px;
+            background:rgba(0,0,0,0.4);
+            box-shadow:0 0 15px rgba(255,122,0,0.5);
+         ">
+        -
+    </div>
+</div>
+
+<!-- TOTAL & LIST -->
+<div id="sectionTotal">
+    <p style="font-size:40px; font-weight:bold;">SISA KANTONG:<br>
+    <span id="totalData">0</span></p></div>
+	<p id="status"></p>
+</div>
+
+<div id="sectionFilter">
+
+<h3>Scan Kantong</h3>
+<div id="reader"></div>
+
+
+    <h3>Filter Kantong</h3>
+    <select id="filterKantong" onchange="filterList()">
+    <option value="all">SEMUA DATA KANTONG</option>
+	</select>
+
+
+<h3>Daftar Kantong Tersedia</h3>
+<table>
+<thead><tr><th>No Kantong</th><th>Kategori</th></tr></thead>
+<tbody id="listKantong"></tbody>
+
+</table>
+
+<!-- FOOTER COPYRIGHT -->
+<div class="cyber-footer">
+    <div class="cyber-line"></div>
+    <div class="cyber-text">
+        © <span id="tahunFooter"></span> WIN KCU BATAM 29400
+        <br>
+        POWERED BY <span class="creator-name">Team Win 29400</span>
+    </div>
+</div>
+
+<script src="app.js"></script>
+</body>
+</html>

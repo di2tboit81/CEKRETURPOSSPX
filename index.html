@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LOGIN CEK KANTONG</title>
+<link rel="icon" href="back1.png">
+<link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+<img src="boit.png" class="logo-header">
+<h2>LOGIN SISTEM</h2>
+
+<!-- FORM LOGIN -->
+<form onsubmit="login(); return false;">
+    <input type="text" id="username" placeholder="Username" autocomplete="off">
+    <input type="password" id="password" placeholder="Password" autocomplete="off">
+
+    <button type="submit">LOGIN</button>
+</form>
+
+<script>
+function login(){
+
+    var user = document.getElementById("username").value.trim();
+    var pass = document.getElementById("password").value.trim();
+
+    // ADMIN
+    if(user==="Admin" && pass==="Di2tboit"){
+        window.location.href="index-admin.html";
+    }
+
+    // WIN1
+    else if(user==="Win1" && pass==="29400"){
+        window.location.href="index-win1.html";
+    }
+
+    // WIN2
+    else if(user==="Win2" && pass==="29400"){
+        window.location.href="index-win2.html";
+    }
+
+    // WIN3
+    else if(user==="Win3" && pass==="29400"){
+        window.location.href="index-win3.html";
+    }
+
+    else{
+        alert("Username / Password salah!");
+    }
+}
+
+/* ===== ANTI INSPECT ===== */
+
+document.addEventListener('contextmenu', function(e){
+    e.preventDefault();
+});
+
+document.onkeydown = function(e){
+
+    // F12
+    if(e.keyCode == 123){
+        return false;
+    }
+
+    // CTRL + SHIFT + I
+    if(e.ctrlKey && e.shiftKey && e.keyCode == 73){
+        return false;
+    }
+
+    // CTRL + SHIFT + J
+    if(e.ctrlKey && e.shiftKey && e.keyCode == 74){
+        return false;
+    }
+
+    // CTRL + U
+    if(e.ctrlKey && e.keyCode == 85){
+        return false;
+    }
+
+    // CTRL + SHIFT + C
+    if(e.ctrlKey && e.shiftKey && e.keyCode == 67){
+        return false;
+    }
+
+};
+
+
+document.onselectstart = function(e){
+
+    if(e.target.closest("#listKantong")){
+        return true;
+    }
+
+    return false;
+};
+
+
+(function(){
+
+function detectDevTools(){
+
+    const start = new Date();
+
+    debugger;
+
+    const end = new Date();
+
+    if(end - start > 100){
+
+        document.body.innerHTML =
+        "<h1 style='color:red;text-align:center;margin-top:100px;'>SECURITY BLOCKED</h1>";
+
+    }
+
+}
+
+setInterval(detectDevTools,1000);
+
+})();
+
+// ===== KLIK NOMOR KANTONG AUTO COPY =====
+document.addEventListener("click", function(e){
+
+    if(e.target.tagName === "TD" && e.target.parentElement.parentElement.id === "listKantong"){
+
+        var teks = e.target.innerText;
+
+        navigator.clipboard.writeText(teks).then(function(){
+
+            // efek notifikasi kecil
+            e.target.style.background = "#00c896";
+
+            setTimeout(function(){
+                e.target.style.background = "";
+            },500);
+
+        });
+
+    }
+
+});
+
+</script>
+
+</body>
+</html>
