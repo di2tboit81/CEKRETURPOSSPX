@@ -18,6 +18,8 @@ var beepBeaCukai = new Audio("https://actions.google.com/sounds/v1/alarms/alarm_
 firebase.initializeApp(firebaseConfig);
 var dbRoot = firebase.database().ref("kantong");
 
+let historyScan = [];
+
 
 function getDBUser(){
 
@@ -177,11 +179,7 @@ function tampilkanHalaman(role){
         document.querySelectorAll("h3")[2].style.display = "block";
     }
 
-    // ===== MODE KHUSUS Win2 (READONLY) =====
-    // ===== MODE KHUSUS Win2 (READONLY) =====
-// ===== MODE KHUSUS PETUGAS (WIN1 & WIN2 SAMA TAMPILAN TOTAL & JUDUL) =====
-// ===== PETUGAS (WIN1 & WIN2) =====
-if(role === "petugas"){
+ if(role === "petugas"){
 
     var dropdown = document.getElementById("filterKantong");
 
@@ -196,6 +194,18 @@ if(role === "petugas"){
         filterList();
 
     }, 500);
+	
+// 🔥 KHUSUS HISTORY WIN3
+var wilayah = sessionStorage.getItem("wilayah");
+var historyBox = document.getElementById("historySection");
+
+if(historyBox){
+    if(wilayah === "win3"){
+        historyBox.style.display = "block";
+    } else {
+        historyBox.style.display = "none";
+    }
+}
 	
 	// ===== KHUSUS WIN3 UBAH TEXT =====
 var wilayah = sessionStorage.getItem("wilayah");
@@ -274,7 +284,12 @@ function ambilStatus(item){
 }
 
 // ===== PETUGAS FUNCTIONS =====
-function manualCheckPetugas(){
+function manualCheckPetugas() {
+    let input = document.getElementById("manualScanPetugas").value;
+
+    if (sessionStorage.getItem("wilayah") === "win3") {
+    tambahHistory(input);
+}
     var kode = document.getElementById("manualScanPetugas").value.trim();
     var judulDipilih = document.getElementById("filterKantong").value;
     if(!kode){
@@ -365,6 +380,9 @@ if(wilayah !== "win3"){
 
 // ===== SCAN QR =====
 function onScanSuccess(decodedText){
+	if (sessionStorage.getItem("wilayah") === "win3") {
+    tambahHistory(decodedText);
+}
 
   if(scanLock) return; // 🔒 kalau masih jeda, abaikan
     scanLock = true;     // 🔒 aktifkan kunci
@@ -1127,3 +1145,56 @@ document.addEventListener("click", function(e){
 
 
 });
+
+function tambahHistory(resi) {
+
+    // 🔒 HANYA WIN3
+    if (sessionStorage.getItem("wilayah") !== "win3") return;
+
+    historyScan.push(resi);
+
+    let li = document.createElement("li");
+    li.textContent = resi;
+    document.getElementById("historyList").appendChild(li);
+}
+
+function hapusHistory() {
+
+    // 🔒 HANYA WIN3
+    if (sessionStorage.getItem("wilayah") !== "win3") {
+        alert("Fitur hanya untuk WIN3");
+        return;
+    }
+
+    if (!confirm("Yakin hapus semua history?")) return;
+
+    let judulDipilih = document.getElementById("filterKantong").value;
+
+    if (judulDipilih === "all") {
+        alert("Pilih judul dulu!");
+        return;
+    }
+
+    historyScan.forEach(resi => {
+        db.child(judulDipilih).child(resi).remove();
+    });
+
+    historyScan = [];
+    document.getElementById("historyList").innerHTML = "";
+
+    filterList(); // 🔥 refresh total & list
+}
+
+function tambahKembaliKeList(resi) {
+    let tbody = document.getElementById("listKantong");
+
+    let tr = document.createElement("tr");
+    tr.innerHTML = `<td>${resi}</td><td>-</td>`;
+
+    tbody.appendChild(tr);
+}
+
+function updateTotal() {
+    let total = document.getElementById("listKantong").children.length;
+    document.getElementById("totalData").innerText = total;
+}
