@@ -142,7 +142,18 @@ sessionStorage.setItem("wilayah","win3");
 </div>
 
 <!-- TOTAL & LIST -->
-<div id="sectionTotal" style="display:none;">
+<div id="sectionTotal" style="display:block;">
+
+<h3>History Scan / Input</h3>
+
+<button onclick="hapusHistory()" style="margin-bottom:10px;">
+    ❌ Hapus Semua History
+</button>
+
+<ul id="historyList" style="display:none;"></ul>
+</div>
+
+<div 
     <p style="font-size:40px; font-weight:bold;">SISA RESI / CN :<br>
     <span id="totalData">0</span></p></div>
 	<p id="status"></p>
