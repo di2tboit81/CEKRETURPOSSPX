@@ -1,6 +1,6 @@
 // ===== FIREBASE =====
 var firebaseConfig = {
-    apiKey: "AIzaSyBQeh3uUSQu69VXyslaqyPQ6cR8eX5M5s4",
+    apiKey: 
     authDomain: "win-29400.firebaseapp.com",
     databaseURL: "https://win-29400-default-rtdb.firebaseio.com",
     projectId: "win-29400",
