@@ -3,142 +3,146 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Database Storage Is Full</title>
-
-<style>
-body {
-    margin: 0;
-    height: 100vh;
-    background: #1f6b7a;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    font-family: Arial, sans-serif;
-}
-
-/* OVERLAY */
-.overlay {
-    position: fixed;
-    width: 100%;
-    height: 100%;
-    background: rgba(0,0,0,0.4);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-}
-
-/* MODAL */
-.modal {
-    background: #f3f3f3;
-    width: 320px;
-    padding: 30px 20px;
-    border-radius: 20px;
-    text-align: center;
-    position: relative;
-    box-shadow: 0 20px 40px rgba(0,0,0,0.3);
-
-    animation: scaleIn 0.4s ease;
-}
-
-/* SHADOW LAYER */
-.modal::before,
-.modal::after {
-    content: "";
-    position: absolute;
-    width: 100%;
-    height: 100%;
-    border-radius: 20px;
-    background: rgba(0,0,0,0.2);
-    top: 10px;
-    left: 10px;
-    z-index: -1;
-}
-.modal::after {
-    top: 20px;
-    left: 20px;
-    opacity: 0.5;
-}
-
-/* ICON */
-.icon {
-    font-size: 45px;
-}
-
-/* TEXT */
-h2 { margin: 10px 0; }
-p { font-size: 14px; }
-
-/* BUTTON */
-.btn {
-    width: 100%;
-    padding: 12px;
-    border: none;
-    border-radius: 10px;
-    margin-top: 10px;
-    font-weight: bold;
-    cursor: pointer;
-}
-
-.btn-upgrade {
-    background: #4caf50;
-    color: white;
-}
-
-.btn-close {
-    background: #ff4d4d;
-    color: white;
-}
-
-/* ANIMASI */
-@keyframes scaleIn {
-    from {
-        opacity: 0;
-        transform: scale(0.7);
-    }
-    to {
-        opacity: 1;
-        transform: scale(1);
-    }
-}
-</style>
+<title>LOGIN CEK KANTONG</title>
+<link rel="icon" href="back1.png">
+<link rel="stylesheet" href="style.css">
 </head>
 
 <body>
 
-<div class="overlay" id="popup">
-    <div class="modal">
-        <div class="icon">⚠️</div>
-        <h2>Database capacity exceeded</h2>
-        <p>
-            You have reached the database limit.<br>
-            Please upgrade your package to continue..
-        </p>
+<img src="boit.png" class="logo-header">
+<h2>LOGIN SISTEM</h2>
 
-        <button class="btn btn-upgrade" onclick="upgrade()">
-            🚀 Upgrade Now!
-        </button>
+<!-- FORM LOGIN -->
+<form onsubmit="login(); return false;">
+    <input type="text" id="username" placeholder="Username" autocomplete="off">
+    <input type="password" id="password" placeholder="Password" autocomplete="off">
 
-        <button class="btn btn-close" onclick="tutup()">
-            Close
-        </button>
-    </div>
-</div>
+    <button type="submit">LOGIN</button>
+</form>
 
 <script>
-// tombol upgrade → redirect
-function upgrade() {
-    window.location.href = "https://example.com/upgrade"; // ganti link
+function login(){
+
+    var user = document.getElementById("username").value.trim();
+    var pass = document.getElementById("password").value.trim();
+
+    // ADMIN
+    if(user==="Admin" && pass==="Di2tboit"){
+        window.location.href="index-admin.html";
+    }
+
+    // WIN1
+    else if(user==="Win1" && pass==="29400"){
+        window.location.href="index-win1.html";
+    }
+
+    // WIN2
+    else if(user==="Win2" && pass==="29400"){
+        window.location.href="index-win2.html";
+    }
+
+    // WIN3
+    else if(user==="Win3" && pass==="29400"){
+        window.location.href="index-win3.html";
+    }
+
+    else{
+        alert("Username / Password salah!");
+    }
 }
 
-// tutup manual
-function tutup() {
-    document.getElementById("popup").style.display = "none";
+/* ===== ANTI INSPECT ===== */
+
+document.addEventListener('contextmenu', function(e){
+    e.preventDefault();
+});
+
+document.onkeydown = function(e){
+
+    // F12
+    if(e.keyCode == 123){
+        return false;
+    }
+
+    // CTRL + SHIFT + I
+    if(e.ctrlKey && e.shiftKey && e.keyCode == 73){
+        return false;
+    }
+
+    // CTRL + SHIFT + J
+    if(e.ctrlKey && e.shiftKey && e.keyCode == 74){
+        return false;
+    }
+
+    // CTRL + U
+    if(e.ctrlKey && e.keyCode == 85){
+        return false;
+    }
+
+    // CTRL + SHIFT + C
+    if(e.ctrlKey && e.shiftKey && e.keyCode == 67){
+        return false;
+    }
+
+};
+
+
+document.onselectstart = function(e){
+
+    if(e.target.closest("#listKantong")){
+        return true;
+    }
+
+    return false;
+};
+
+
+(function(){
+
+function detectDevTools(){
+
+    const start = new Date();
+
+    debugger;
+
+    const end = new Date();
+
+    if(end - start > 100){
+
+        document.body.innerHTML =
+        "<h1 style='color:red;text-align:center;margin-top:100px;'>SECURITY BLOCKED</h1>";
+
+    }
+
 }
 
-// auto close + redirect (5 detik)
-setTimeout(() => {
-    window.location.href = "https://example.com/upgrade";
-}, 5000);
+setInterval(detectDevTools,1000);
+
+})();
+
+// ===== KLIK NOMOR KANTONG AUTO COPY =====
+document.addEventListener("click", function(e){
+
+    if(e.target.tagName === "TD" && e.target.parentElement.parentElement.id === "listKantong"){
+
+        var teks = e.target.innerText;
+
+        navigator.clipboard.writeText(teks).then(function(){
+
+            // efek notifikasi kecil
+            e.target.style.background = "#00c896";
+
+            setTimeout(function(){
+                e.target.style.background = "";
+            },500);
+
+        });
+
+    }
+
+});
+
 </script>
 
 </body>
