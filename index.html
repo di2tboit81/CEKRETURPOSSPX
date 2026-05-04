@@ -8,6 +8,8 @@
 <link rel="stylesheet" href="style.css">
 </head>
 
+
+
 <body>
 
 <img src="boit.png" class="logo-header">
@@ -21,7 +23,16 @@
     <button type="submit">LOGIN</button>
 </form>
 
+<button onclick="logout()" class="btn-logout">
+    LOGOUT
+</button>
+
 <script>
+
+function logout(){
+    window.location.href = "https://di2tboit81.github.io/ESP-POSIND/";
+}
+
 function login(){
 
     var user = document.getElementById("username").value.trim();
@@ -146,4 +157,15 @@ document.addEventListener("click", function(e){
 </script>
 
 </body>
+
+<!-- FOOTER COPYRIGHT -->
+<div class="cyber-footer">
+    <div class="cyber-line"></div>
+    <div class="cyber-text">
+        © <span id="tahunFooter"></span> WIN KCU BATAM 29400
+        <br>
+        POWERED BY <span class="creator-name">Team Win 29400</span>
+    </div>
+</div>
+
 </html>
