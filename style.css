@@ -654,3 +654,19 @@ h3:nth-of-type(4)
 #listKantong td {
 user-select: text;
 }
+
+.neon-title{
+    cursor:pointer;
+    color:#fff;
+    text-shadow:
+        0 0 5px #00f7ff,
+        0 0 10px #00f7ff,
+        0 0 20px #00f7ff,
+        0 0 40px #00f7ff;
+    transition:0.2s;
+}
+
+.neon-title:active{
+    transform:scale(0.96);
+}
+
