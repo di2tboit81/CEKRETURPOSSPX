@@ -1,0 +1,497 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SORTIR DATA KANTONG DAN CN / RESI </title>
+
+<link rel="stylesheet" href="style.css">
+<script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
+<script src="https://unpkg.com/html5-qrcode"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+
+<style>
+body { font-family: Arial; padding:20px; }
+#reader { width:300px; margin-top:20px; }
+#result { margin-top:20px; }
+
+button{
+    padding:10px 15px;
+    cursor:pointer;
+}
+
+.neon-back-btn{
+    display:inline-block;
+    padding:12px 22px;
+    margin-bottom:20px;
+    border-radius:14px;
+    text-decoration:none;
+    font-weight:bold;
+    letter-spacing:1px;
+    color:#00f7ff;
+    border:2px solid #00f7ff;
+    background:#111;
+    box-shadow:
+        0 0 5px #00f7ff,
+        0 0 15px #00f7ff,
+        inset 0 0 10px rgba(0,247,255,0.4);
+    transition:0.2s;
+}
+
+.neon-back-btn:active{
+    transform:scale(0.95);
+}
+
+.neon-back-btn:hover{
+    box-shadow:
+        0 0 10px #00f7ff,
+        0 0 25px #00f7ff,
+        0 0 45px #00f7ff;
+}
+
+</style>
+</head>
+
+<body>
+
+<script>
+
+var beepSuccess = new Audio("https://actions.google.com/sounds/v1/cartoon/clang_and_wobble.ogg");
+
+var beepError = new Audio("https://actions.google.com/sounds/v1/alarms/winding_alarm_clock.ogg");
+
+</script>
+
+<h2>SORTIR DATA KANTONG DAN CN / RESI</h2>
+
+<!-- FORM PILIH JUDUL -->
+<div style="
+    background:#111;
+    padding:15px;
+    border-radius:12px;
+    margin-bottom:15px;
+">
+
+    <div style="
+        color:white;
+        font-size:20px;
+        font-weight:bold;
+        margin-bottom:10px;
+    ">
+        📂 PILIH JUDUL KANTONG
+    </div>
+
+    <select id="pilihJudul" style="
+        width:100%;
+        padding:12px;
+        border-radius:10px;
+        font-size:16px;
+    ">
+        <option value="">-- Pilih Judul Kantong --</option>
+    </select>
+
+</div>
+
+<!-- FORM HAPUS JUDUL -->
+<div style="
+    display:none;
+    background:#2b0000;
+    padding:15px;
+    border-radius:12px;
+    margin-bottom:15px;
+">
+
+    <div style="
+        color:white;
+        font-size:20px;
+        font-weight:bold;
+        margin-bottom:10px;
+    ">
+        🗑 HAPUS DATA KANTONG
+    </div>
+
+    <button onclick="hapusJudul()" style="
+        background:red;
+        color:white;
+        border:none;
+        padding:12px 18px;
+        border-radius:10px;
+        font-weight:bold;
+        font-size:16px;
+    ">
+        Hapus KANTONG Terpilih
+    </button>
+
+</div>
+
+<br><br>
+
+<!-- INPUT JUDUL & UPLOAD DISEMBUNYIKAN -->
+<div style="display:none;">
+
+    <!-- INPUT JUDUL -->
+    <input type="text" id="judulData" placeholder="Masukkan Judul Data" />
+
+    <!-- TOMBOL UPLOAD -->
+    <button onclick="uploadExcel()">Upload Data Excel</button>
+
+</div>
+
+<!-- INPUT FILE DISEMBUNYIKAN -->
+<input type="file" id="upload" accept=".xlsx, .xls" style="display:none;" />
+
+<br><br>
+
+<!-- INPUT MANUAL -->
+<input type="text" id="search" placeholder="Masukkan Resi / Data..." />
+<button onclick="cariData()">Cari</button>
+
+<!-- SCANNER -->
+<div id="reader"></div>
+
+<div id="result"></div>
+
+<script>
+// ===== FIREBASE CONFIG =====
+var firebaseConfig = {
+    apiKey: "AIzaSyBQeh3uUSQu69VXyslaqyPQ6cR8eX5M5s4",
+    authDomain: "win-29400.firebaseapp.com",
+    databaseURL: "https://win-29400-default-rtdb.firebaseio.com",
+    projectId: "win-29400",
+    storageBucket: "win-29400.firebasestorage.app",
+    messagingSenderId: "186236557243",
+    appId: "1:186236557243:web:1e26f6848dd917a4cb969e"
+};
+
+firebase.initializeApp(firebaseConfig);
+
+var db = firebase.database();
+
+let dataExcel = [];
+
+// ===== LOAD JUDUL =====
+// ===== LOAD JUDUL =====
+function loadJudul(){
+
+    db.ref('win4').once('value')
+    .then(snapshot => {
+
+        let data = snapshot.val() || {};
+
+        let select = document.getElementById('pilihJudul');
+
+        select.innerHTML = '<option value="">-- Pilih Judul Data --</option>';
+
+        // hanya ambil judul asli
+        for(let judul in data){
+
+            // skip jika angka
+            if(!isNaN(judul)) continue;
+
+            select.innerHTML += `
+                <option value="${judul}">${judul}</option>
+            `;
+        }
+
+    });
+}
+
+loadJudul();
+
+// ===== HAPUS JUDUL =====
+function hapusJudul(){
+
+    let judul = document.getElementById('pilihJudul').value;
+
+    if(!judul){
+
+        alert('Pilih judul yang ingin dihapus');
+
+        return;
+    }
+
+    let konfirmasi = confirm('Yakin ingin menghapus data "' + judul + '" ?');
+
+    if(!konfirmasi) return;
+
+    // hapus dari firebase
+    db.ref('win4/' + judul).remove()
+    .then(() => {
+
+        alert('Data berhasil dihapus');
+
+        // refresh dropdown
+        loadJudul();
+
+        // kosongkan hasil
+        document.getElementById('result').innerHTML = '';
+
+        // reset pilihan
+        document.getElementById('pilihJudul').value = '';
+
+    })
+    .catch(err => {
+
+        console.error(err);
+
+        alert('Gagal menghapus data');
+
+    });
+}
+
+
+// ===== TOMBOL UPLOAD =====
+function uploadExcel(){
+
+    let judul = document.getElementById('judulData').value.trim();
+
+    if(!judul){
+        alert('Masukkan judul data terlebih dahulu');
+        return;
+    }
+
+    // buka file explorer
+    document.getElementById('upload').click();
+}
+
+
+// ===== PROSES UPLOAD EXCEL =====
+document.getElementById('upload').addEventListener('change', function(e){
+
+    let judul = document.getElementById('judulData').value.trim();
+
+    let file = e.target.files[0];
+
+    if(!file) return;
+
+    let reader = new FileReader();
+
+    reader.onload = function(e){
+
+        let data = new Uint8Array(e.target.result);
+
+        let workbook = XLSX.read(data, {type: 'array'});
+
+        let sheet = workbook.Sheets[workbook.SheetNames[0]];
+
+        // CLEAN DATA
+        dataExcel = XLSX.utils.sheet_to_json(sheet).map(row => {
+
+            let newRow = {};
+
+            Object.keys(row).forEach(key => {
+
+                let cleanKey = key.trim();
+
+                let value = String(row[key]).trim();
+
+                newRow[cleanKey] = value;
+
+            });
+
+            return newRow;
+
+        });
+
+        console.log('DATA EXCEL:', dataExcel);
+
+        // SIMPAN KE FIREBASE
+        db.ref('win4/' + judul).set(dataExcel)
+        .then(() => {
+
+            alert('Data berhasil diupload');
+
+            // otomatis masuk ke pilihan judul
+            loadJudul();
+
+            // otomatis pilih judul yang baru diupload
+            document.getElementById('pilihJudul').value = judul;
+
+            // kosongkan input
+            document.getElementById('judulData').value = '';
+            document.getElementById('upload').value = '';
+
+        })
+        .catch(err => {
+
+            console.error(err);
+
+            alert('Gagal upload');
+
+        });
+    }
+
+    reader.readAsArrayBuffer(file);
+});
+
+
+// ===== CARI DATA =====
+function cariData(keywordManual){
+
+    let judul = document.getElementById('pilihJudul').value;
+
+    if(!judul){
+        document.getElementById('result').innerHTML = 'Pilih judul data terlebih dahulu';
+        playError();
+        return;
+    }
+
+    let keyword = keywordManual || document.getElementById('search').value;
+
+    if(!keyword){
+        document.getElementById('result').innerHTML = 'Masukkan kata kunci!';
+        return;
+    }
+
+    keyword = keyword.toLowerCase().trim();
+
+    db.ref('win4/' + judul).once('value')
+    .then(snapshot => {
+
+        let data = snapshot.val();
+
+        console.log("DATA FIREBASE:", data);
+
+        if(!data){
+            document.getElementById('result').innerHTML = 'Data kosong';
+            return;
+        }
+
+        let hasil = '';
+
+        Object.values(data).forEach(item => {
+
+            let ditemukan = Object.values(item).some(val =>
+                String(val).toLowerCase().trim().includes(keyword)
+            );
+
+            if(ditemukan){
+
+                hasil += `
+<div style="
+    border:2px solid #000;
+    background:#FFFFFF;
+    padding:15px;
+    margin:10px 0;
+    border-radius:10px;
+    font-weight:bold;
+    color:#000000;
+    font-size:16px;
+">
+`;
+
+                Object.entries(item).forEach(([k,v])=>{
+
+                    hasil += `
+                    <div style="margin-bottom:6px;">
+                        ${k}: ${v}
+                    </div>
+                    `;
+
+                });
+
+                hasil += '</div>';
+
+            }
+        });
+
+        if(hasil){
+
+            document.getElementById('result').innerHTML = hasil;
+            playSuccess();
+
+        }else{
+
+            document.getElementById('result').innerHTML = 'Data tidak ditemukan';
+            playError();
+
+        }
+    })
+    .catch(err => {
+
+        console.error(err);
+
+        document.getElementById('result').innerHTML = 'Error ambil data';
+
+    });
+}
+
+
+// ===== SCANNER QR =====
+function onScanSuccess(decodedText) {
+
+    document.getElementById('search').value = decodedText.trim();
+
+    cariData(decodedText);
+
+    setTimeout(() => {
+
+        document.getElementById('search').value = '';
+
+    }, 500);
+}
+
+let html5QrcodeScanner = new Html5QrcodeScanner(
+    "reader",
+    { fps: 10, qrbox: 250 }
+);
+
+html5QrcodeScanner.render(onScanSuccess);
+
+
+// ===== ENTER UNTUK CARI =====
+document.getElementById("search").addEventListener("keypress", function(e){
+
+    if(e.key === "Enter"){
+
+        cariData();
+
+        document.getElementById('search').value = '';
+
+    }
+});
+
+
+// ===== SOUND =====
+function playSuccess(){
+
+    beepSuccess.currentTime = 0;
+
+    beepSuccess.play()
+    .catch(err => console.log(err));
+}
+
+function playError(){
+
+    beepError.currentTime = 0;
+
+    beepError.play()
+    .catch(err => console.log(err));
+}
+
+
+// ===== UNLOCK AUDIO =====
+document.body.addEventListener('click', function initAudio() {
+
+    beepSuccess.play().then(()=>{
+        beepSuccess.pause();
+        beepSuccess.currentTime = 0;
+    }).catch(()=>{});
+
+    beepError.play().then(()=>{
+        beepError.pause();
+        beepError.currentTime = 0;
+    }).catch(()=>{});
+
+    document.body.removeEventListener('click', initAudio);
+
+}, { once:true });
+
+</script>
+
+</body>
+<a href="index-win3.html" class="neon-back-btn">
+    ⬅ KEMBALI KE WIN 3
+</a>
+</html>
