@@ -239,6 +239,10 @@ document.getElementById("tombolKeluar").style.display = "none";
 
 // ===== LOGOUT =====
 function logout(){
+
+    // 🔥 HAPUS CACHE TOTAL WIN2 SAAT LOGOUT
+    sessionStorage.removeItem("cacheTotalWin2");
+
     sessionStorage.clear();
     window.location.href = "index.html";
 }
@@ -320,9 +324,16 @@ if(judulDipilih === "all" && mode === "readonly"){
         statusText = item.status ? item.status : "OK KANTONG DI TERIMA";
     }
 
-    tampilkanStatusScan(kode, statusText);
-    beepSuccess.play();
-    return;
+    // 🔥 HAPUS DATA KHUSUS WIN2 SAAT MODE ALL
+db.child(judul).child(String(kode).trim()).remove();
+
+tampilkanStatusScan(kode, statusText);
+beepSuccess.play();
+
+// refresh total realtime
+filterList();
+
+return;
 }
             }
         }
@@ -410,9 +421,16 @@ if(judulDipilih === "all" && mode === "readonly"){
                     var statusText = item.status_win2 ? item.status_win2 : "-";
 
                     // ✅ HANYA TAMPILKAN (TIDAK KURANG TOTAL)
-                    tampilkanStatusScan(decodedText, statusText);
-                    beepSuccess.play();
-                    return;
+                    // 🔥 HAPUS DATA KHUSUS WIN2 SAAT MODE ALL
+db.child(judul).child(String(decodedText).trim()).remove();
+
+tampilkanStatusScan(decodedText, statusText);
+beepSuccess.play();
+
+// refresh total realtime
+filterList();
+
+return;
                 }
             }
         }
@@ -477,13 +495,21 @@ function filterList(){
 // 🔥 KHUSUS WIN2
 // ===== KHUSUS PETUGAS =====
 if(mode === "readonly"){ 
-    // 🔵 WIN2 (tetap seperti sebelumnya)
+
+    // ===== KHUSUS WIN2 =====
     if(filter === "all"){
+
         document.querySelector("table").style.display = "none";
-        document.querySelectorAll("h3")[4].style.display = "none";
+
+        // JUDUL TOTAL TETAP MUNCUL
+        document.querySelector("#infoJudulBox h3").style.display = "block";
+
     } else {
+
         document.querySelector("table").style.display = "table";
-        document.querySelectorAll("h3")[4].style.display = "block";
+
+        document.querySelector("#infoJudulBox h3").style.display = "block";
+
     }
 }
 else if(mode === "normal"){ 
@@ -938,7 +964,54 @@ function tampilkanInfoJudul(judul){
 
     var box = document.getElementById("infoJudulBox");
     var text = document.getElementById("infoJudulText");
+    var title = document.querySelector("#infoJudulBox h3");
 
+    var wilayah = sessionStorage.getItem("wilayah");
+
+    // ===== KHUSUS WIN2 SAAT ALL =====
+// ===== KHUSUS WIN2 SAAT ALL =====
+if(judul === "all" && wilayah === "win2"){
+	// 🔥 SEMBUNYIKAN BOX KHUSUS WIN2 SAAT ALL
+box.style.display = "none";
+return;
+
+   
+
+    // kalau belum ada → hitung dari database
+    db.once("value", function(snapshot){
+
+        var total = 0;
+
+        snapshot.forEach(function(judulSnap){
+
+            judulSnap.forEach(function(child){
+                total++;
+            });
+
+        });
+
+        // 🔥 SIMPAN TOTAL AWAL
+        sessionStorage.setItem("cacheTotalWin2", total);
+
+        text.innerHTML = `
+            <div style="
+                font-size:100px;
+                font-weight:bold;
+                color:#00ffae;
+                text-align:center;
+            ">
+                ${total}
+            </div>
+        `;
+
+        box.style.display = "block";
+
+    });
+
+    return;
+}
+
+    // ===== DEFAULT =====
     if(judul === "all"){
         box.style.display = "none";
         text.innerText = "-";
@@ -952,24 +1025,20 @@ function tampilkanInfoJudul(judul){
 
         if(data){
             for(var kode in data){
-                if(data[kode].infoJudul){
+
+                if(typeof data[kode] === "object" && data[kode].infoJudul){
                     info = data[kode].infoJudul;
-                    break; // cukup ambil 1 saja
+                    break;
                 }
             }
         }
+
+        title.innerText = "TOTAL KANTONG PENGAJUAN";
 
         text.innerText = info;
         box.style.display = "block";
     });
 }
-/* TAMBAHKAN DI SINI */
-window.addEventListener("load", function(){
-    var el = document.getElementById("tahunFooter");
-    if(el){
-        el.innerText = new Date().getFullYear();
-    }
-});
 
 function loadJudulAdmin(){
 
