@@ -164,8 +164,42 @@ document.addEventListener("click", function(e){
 <!-- USER INFO & FORM -->
 <div id="userInfo" style="display:none;">
     <span id="namaUser"></span>
+
     <button onclick="logout()">Logout</button>
-    <button id="hapusSemuaBtn" onclick="hapusSemuaData()" style="display:none;">Hapus Semua Data</button>
+</div>
+    <!-- KHUSUS WIN2 -->
+<div id="modeWin2Box" style="display:none; margin-top:10px;">
+        <button id="btnOnCheck" onclick="setModeCheck()"
+        style="
+        background:#00bfff;
+        color:white;
+        border:none;
+        padding:10px 18px;
+        border-radius:10px;
+        font-weight:bold;
+        cursor:pointer;
+        margin-right:20px;
+        ">
+        ON CHECK
+        </button>
+
+        <button id="btnSortir" onclick="setModeSortir()"
+        style="
+        background:#ff7a00;
+        color:white;
+        border:none;
+        padding:10px 18px;
+        border-radius:10px;
+        font-weight:bold;
+        cursor:pointer;
+        ">
+        SORTIR
+        </button>
+    </div>
+
+    <button id="hapusSemuaBtn" onclick="hapusSemuaData()" style="display:none;">
+        Hapus Semua Data
+    </button>
 </div>
 
     <!-- Admin Form -->
