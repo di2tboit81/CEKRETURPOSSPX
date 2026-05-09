@@ -303,7 +303,14 @@ function manualCheckPetugas() {
    var mode = sessionStorage.getItem("mode");
 
 // Jika Win2 dan masih ALL → cari ke semua judul
+// Jika Win2 dan masih ALL → cari ke semua judul
 if(judulDipilih === "all" && mode === "readonly"){
+
+    // 🔥 WAJIB PILIH MODE DULU
+    if(modeWin2 !== "check" && modeWin2 !== "sortir"){
+        alert("Pilih MODE dulu ONCHECK atau SORTIR");
+        return;
+    }
 
     db.once("value", snap=>{
         var data = snap.val();
@@ -325,12 +332,36 @@ if(judulDipilih === "all" && mode === "readonly"){
     }
 
     // 🔥 HAPUS DATA KHUSUS WIN2 SAAT MODE ALL
-db.child(judul).child(String(kode).trim()).remove();
+// ===== MODE KHUSUS WIN2 =====
+// ===== MODE KHUSUS WIN2 =====
+if(modeWin2 === "check"){
 
+    console.log("MODE CHECK");
+
+    // ✅ hanya cek
+    // tidak mengurangi data
+
+}
+else if(modeWin2 === "sortir"){
+
+    console.log("MODE SORTIR");
+
+    // ✅ langsung kurangi data
+    db.child(judul).child(String(kode).trim()).remove();
+
+}
+else{
+
+    alert("Pilih MODE dulu!");
+    return;
+
+}
+
+// tampilkan hasil scan
 tampilkanStatusScan(kode, statusText);
 beepSuccess.play();
 
-// refresh total realtime
+// refresh realtime
 filterList();
 
 return;
@@ -406,7 +437,15 @@ function onScanSuccess(decodedText){
     var mode = sessionStorage.getItem("mode");
 	
 // Jika Win2 dan masih ALL → cari ke semua judul
+// Jika Win2 dan masih ALL → cari ke semua judul
 if(judulDipilih === "all" && mode === "readonly"){
+
+    // 🔥 wajib pilih mode dulu
+    if(modeWin2 !== "check" && modeWin2 !== "sortir"){
+        tampilkanStatusScan(decodedText, "PILIH MODE DULU");
+        beepError.play();
+        return;
+    }
 
     db.once("value", snap=>{
         var data = snap.val();
@@ -420,9 +459,26 @@ if(judulDipilih === "all" && mode === "readonly"){
                     var item = data[judul][decodedText];
                     var statusText = item.status_win2 ? item.status_win2 : "-";
 
-                    // ✅ HANYA TAMPILKAN (TIDAK KURANG TOTAL)
-                    // 🔥 HAPUS DATA KHUSUS WIN2 SAAT MODE ALL
-db.child(judul).child(String(decodedText).trim()).remove();
+                    // ===== MODE KHUSUS WIN2 =====
+if(modeWin2 === "check"){
+
+    // ✅ hanya cek
+    // tidak mengurangi total
+
+}
+else if(modeWin2 === "sortir"){
+
+    // ✅ langsung kurangi data
+    db.child(judul).child(String(decodedText).trim()).remove();
+
+}
+else{
+
+    tampilkanStatusScan(decodedText, "PILIH MODE DULU");
+    beepError.play();
+    return;
+
+}
 
 tampilkanStatusScan(decodedText, statusText);
 beepSuccess.play();
@@ -1267,3 +1323,122 @@ function updateTotal() {
     let total = document.getElementById("listKantong").children.length;
     document.getElementById("totalData").innerText = total;
 }
+
+/* =========================================
+   MODE KHUSUS WIN2
+========================================= */
+
+let modeWin2 = ""; // belum pilih mode
+
+function tampilkanModeWin2(){
+
+    const wilayah = sessionStorage.getItem("wilayah");
+
+    // hanya WIN2
+    if(wilayah === "win2"){
+
+        // hanya saat pilih SEMUA DATA KANTONG
+        const filter = document.getElementById("filterKantong");
+
+       function cekTampil(){
+
+    if(filter.value === "all"){
+
+        document.getElementById("modeWin2Box").style.display = "block";
+
+        // reset mode saat masuk ALL
+        modeWin2 = "";
+
+        document.getElementById("btnOnCheck").style.opacity = "0.5";
+        document.getElementById("btnSortir").style.opacity = "0.5";
+
+    }else{
+
+        document.getElementById("modeWin2Box").style.display = "none";
+
+        // reset lagi saat keluar ALL
+        modeWin2 = "";
+
+    }
+
+}
+
+        cekTampil();
+
+        filter.addEventListener("change", cekTampil);
+
+    }
+
+}
+
+/* =========================
+   TOMBOL MODE
+========================= */
+
+function setModeCheck(){
+
+    modeWin2 = "check";
+
+    document.getElementById("btnOnCheck").style.opacity = "1";
+    document.getElementById("btnSortir").style.opacity = "0.5";
+
+    showNotif("MODE ON CHECK AKTIF");
+
+}
+
+function setModeSortir(){
+
+    modeWin2 = "sortir";
+
+    document.getElementById("btnOnCheck").style.opacity = "0.5";
+    document.getElementById("btnSortir").style.opacity = "1";
+
+    showNotif("MODE SORTIR AKTIF");
+
+}
+
+/* =========================
+   NOTIF KECIL
+========================= */
+
+function showNotif(text){
+
+    let notif = document.createElement("div");
+
+    notif.innerText = text;
+
+    notif.style.position = "fixed";
+
+    // 🔥 posisi tengah
+    notif.style.top = "50%";
+    notif.style.left = "50%";
+    notif.style.transform = "translate(-50%, -50%)";
+
+    notif.style.background = "rgba(0,0,0,0.85)";
+    notif.style.color = "#00ffcc";
+
+    notif.style.padding = "10px 18px";
+    notif.style.borderRadius = "8px";
+
+    notif.style.zIndex = "99999";
+
+    notif.style.fontWeight = "bold";
+    notif.style.fontSize = "16px";
+
+    notif.style.boxShadow = "0 0 10px #00ffcc";
+
+    document.body.appendChild(notif);
+
+    setTimeout(()=>{
+        notif.remove();
+    },1500);
+
+}
+
+/* =========================
+   PANGGIL SAAT LOGIN
+========================= */
+
+setTimeout(()=>{
+    tampilkanModeWin2();
+},1000);
