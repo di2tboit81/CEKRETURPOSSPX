@@ -167,35 +167,7 @@ document.addEventListener("click", function(e){
 
     <button onclick="logout()">Logout</button>
 </div>
-    <!-- KHUSUS WIN2 -->
-<div id="modeWin2Box" style="display:none; margin-top:10px;">
-        <button id="btnOnCheck" onclick="setModeCheck()"
-        style="
-        background:#00bfff;
-        color:white;
-        border:none;
-        padding:10px 18px;
-        border-radius:10px;
-        font-weight:bold;
-        cursor:pointer;
-        margin-right:20px;
-        ">
-        ON CHECK
-        </button>
-
-        <button id="btnSortir" onclick="setModeSortir()"
-        style="
-        background:#ff7a00;
-        color:white;
-        border:none;
-        padding:10px 18px;
-        border-radius:10px;
-        font-weight:bold;
-        cursor:pointer;
-        ">
-        SORTIR
-        </button>
-    </div>
+   
 
     <button id="hapusSemuaBtn" onclick="hapusSemuaData()" style="display:none;">
         Hapus Semua Data
@@ -280,9 +252,30 @@ document.addEventListener("click", function(e){
 
 
     <h3>Filter Kantong</h3>
-    <select id="filterKantong" onchange="filterList()">
-    <option value="all">SEMUA DATA KANTONG</option>
-	</select>
+
+<select id="filterKantong" onchange="filterList()">
+<option value="all">SEMUA DATA KANTONG</option>
+</select>
+
+<!-- KHUSUS WIN2 -->
+<div id="multiJudulBox" style="display:none; margin-top:15px;">
+
+<h3>PILIH PENGAJUAN YANG AKAN DIKURANGI</h3>
+
+<div id="multiJudulList"
+style="
+max-height:220px;
+overflow:auto;
+padding:10px;
+border-radius:12px;
+background:rgba(0,0,0,0.35);
+border:1px solid rgba(255,255,255,0.1);
+">
+</div>
+
+</div>
+
+
 
 
 <h3>Daftar Kantong Tersedia</h3>
