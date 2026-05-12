@@ -20,6 +20,8 @@ var dbRoot = firebase.database().ref("kantong");
 
 let historyScan = [];
 
+let selectedJudulWin2 = [];
+
 
 function getDBUser(){
 
@@ -306,11 +308,6 @@ function manualCheckPetugas() {
 // Jika Win2 dan masih ALL → cari ke semua judul
 if(judulDipilih === "all" && mode === "readonly"){
 
-    // 🔥 WAJIB PILIH MODE DULU
-    if(modeWin2 !== "check" && modeWin2 !== "sortir"){
-        alert("Pilih MODE dulu ONCHECK atau SORTIR");
-        return;
-    }
 
     db.once("value", snap=>{
         var data = snap.val();
@@ -331,29 +328,19 @@ if(judulDipilih === "all" && mode === "readonly"){
         statusText = item.status ? item.status : "OK KANTONG DI TERIMA";
     }
 
-    // 🔥 HAPUS DATA KHUSUS WIN2 SAAT MODE ALL
-// ===== MODE KHUSUS WIN2 =====
-// ===== MODE KHUSUS WIN2 =====
-if(modeWin2 === "check"){
+   // ===== KHUSUS WIN2 =====
 
-    console.log("MODE CHECK");
+// jika judul dicentang
+if(selectedJudulWin2.includes(judul)){
 
-    // ✅ hanya cek
-    // tidak mengurangi data
-
-}
-else if(modeWin2 === "sortir"){
-
-    console.log("MODE SORTIR");
-
-    // ✅ langsung kurangi data
+    // kurangi data
     db.child(judul).child(String(kode).trim()).remove();
 
-}
-else{
+    console.log("DATA DIKURANGI:", judul);
 
-    alert("Pilih MODE dulu!");
-    return;
+}else{
+
+    console.log("TIDAK DIKURANGI:", judul);
 
 }
 
@@ -440,12 +427,7 @@ function onScanSuccess(decodedText){
 // Jika Win2 dan masih ALL → cari ke semua judul
 if(judulDipilih === "all" && mode === "readonly"){
 
-    // 🔥 wajib pilih mode dulu
-    if(modeWin2 !== "check" && modeWin2 !== "sortir"){
-        tampilkanStatusScan(decodedText, "PILIH MODE DULU");
-        beepError.play();
-        return;
-    }
+   
 
     db.once("value", snap=>{
         var data = snap.val();
@@ -459,24 +441,19 @@ if(judulDipilih === "all" && mode === "readonly"){
                     var item = data[judul][decodedText];
                     var statusText = item.status_win2 ? item.status_win2 : "-";
 
-                    // ===== MODE KHUSUS WIN2 =====
-if(modeWin2 === "check"){
+// ===== KHUSUS WIN2 =====
 
-    // ✅ hanya cek
-    // tidak mengurangi total
+// jika judul dicentang
+if(selectedJudulWin2.includes(judul)){
 
-}
-else if(modeWin2 === "sortir"){
-
-    // ✅ langsung kurangi data
+    // kurangi data
     db.child(judul).child(String(decodedText).trim()).remove();
 
-}
-else{
+    console.log("DATA DIKURANGI:", judul);
 
-    tampilkanStatusScan(decodedText, "PILIH MODE DULU");
-    beepError.play();
-    return;
+}else{
+
+    console.log("TIDAK DIKURANGI:", judul);
 
 }
 
@@ -689,8 +666,12 @@ dbRoot.once("value", function(snap){
 });
 
 tampilkanInfoJudul(filter);
+
 bersihkanJudulKosong();
-	
+
+// KHUSUS WIN2
+loadMultiJudulWin2();
+
 }
 
 // ===== HAPUS SEMUA DATA =====
@@ -1332,45 +1313,13 @@ let modeWin2 = ""; // belum pilih mode
 
 function tampilkanModeWin2(){
 
-    const wilayah = sessionStorage.getItem("wilayah");
+    const box = document.getElementById("modeWin2Box");
 
-    // hanya WIN2
-    if(wilayah === "win2"){
-
-        // hanya saat pilih SEMUA DATA KANTONG
-        const filter = document.getElementById("filterKantong");
-
-       function cekTampil(){
-
-    if(filter.value === "all"){
-
-        document.getElementById("modeWin2Box").style.display = "block";
-
-        // reset mode saat masuk ALL
-        modeWin2 = "";
-
-        document.getElementById("btnOnCheck").style.opacity = "0.5";
-        document.getElementById("btnSortir").style.opacity = "0.5";
-
-    }else{
-
-        document.getElementById("modeWin2Box").style.display = "none";
-
-        // reset lagi saat keluar ALL
-        modeWin2 = "";
-
+    if(box){
+        box.style.display = "none";
     }
 
 }
-
-        cekTampil();
-
-        filter.addEventListener("change", cekTampil);
-
-    }
-
-}
-
 /* =========================
    TOMBOL MODE
 ========================= */
@@ -1439,6 +1388,88 @@ function showNotif(text){
    PANGGIL SAAT LOGIN
 ========================= */
 
-setTimeout(()=>{
-    tampilkanModeWin2();
-},1000);
+/* =========================================
+   MULTI PILIH PENGAJUAN WIN2
+========================================= */
+
+function loadMultiJudulWin2(){
+
+    const wilayah = sessionStorage.getItem("wilayah");
+
+    const box = document.getElementById("multiJudulBox");
+    const list = document.getElementById("multiJudulList");
+    const filter = document.getElementById("filterKantong");
+
+    if(!box || !list || !filter) return;
+
+    // hanya WIN2 + SEMUA DATA
+    if(wilayah !== "win2" || filter.value !== "all"){
+
+        box.style.display = "none";
+        return;
+    }
+
+    box.style.display = "block";
+
+    db.once("value", snap=>{
+
+        let data = snap.val();
+
+        list.innerHTML = "";
+
+        if(!data) return;
+
+        Object.keys(data).forEach(judul=>{
+
+            const checked =
+            selectedJudulWin2.includes(judul)
+            ? "checked"
+            : "";
+
+            list.innerHTML += `
+            <label style="
+                display:flex;
+                align-items:center;
+                gap:10px;
+                margin-bottom:8px;
+                cursor:pointer;
+            ">
+
+            <input
+                type="checkbox"
+                value="${judul}"
+                ${checked}
+                onchange="toggleJudulWin2(this)"
+            >
+
+            ${judul}
+
+            </label>
+            `;
+
+        });
+
+    });
+
+}
+
+function toggleJudulWin2(el){
+
+    const val = el.value;
+
+    if(el.checked){
+
+        if(!selectedJudulWin2.includes(val)){
+            selectedJudulWin2.push(val);
+        }
+
+    }else{
+
+        selectedJudulWin2 =
+        selectedJudulWin2.filter(x=>x !== val);
+
+    }
+
+    console.log("JUDUL AKTIF:", selectedJudulWin2);
+
+}
