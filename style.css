@@ -940,3 +940,103 @@ user-select: text;
 
     border-radius:20px;
 }
+/* =========================
+   ULTRA NEON ERROR WIN2
+========================= */
+
+.orange-error{
+
+    display:inline-block;
+
+    padding:14px 28px;
+
+    font-size:26px;
+    font-weight:900;
+
+    color:#ff4d4d;
+
+    background:rgba(255, 0, 0, 0.07);
+
+    border:2px solid rgba(255,0,0,0.85);
+
+    border-radius:18px;
+
+    text-transform:uppercase;
+    letter-spacing:1.5px;
+
+    text-align:center;
+    line-height:1.5;
+
+    backdrop-filter:blur(4px);
+
+    animation:
+        neonSmooth 1.2s ease-in-out infinite alternate,
+        glowFloat 2.5s ease-in-out infinite;
+
+    box-shadow:
+        0 0 8px rgba(255,0,0,0.9),
+        0 0 18px rgba(255,0,0,0.8),
+        0 0 35px rgba(255,0,0,0.7),
+        inset 0 0 12px rgba(255,0,0,0.25);
+
+    text-shadow:
+        0 0 3px #fff,
+        0 0 8px #ff1a1a,
+        0 0 16px #ff0000,
+        0 0 28px #ff0000,
+        0 0 45px rgba(255,0,0,0.95);
+
+    transition:all 0.3s ease;
+
+    max-width:92%;
+    word-break:break-word;
+}
+
+/* nyala smooth */
+@keyframes neonSmooth{
+
+    from{
+        opacity:0.88;
+
+        box-shadow:
+            0 0 6px rgba(255,0,0,0.7),
+            0 0 14px rgba(255,0,0,0.6),
+            0 0 28px rgba(255,0,0,0.5);
+
+        text-shadow:
+            0 0 3px #fff,
+            0 0 8px #ff0000,
+            0 0 18px #ff0000;
+    }
+
+    to{
+        opacity:1;
+
+        box-shadow:
+            0 0 10px rgba(255,0,0,1),
+            0 0 24px rgba(255,0,0,0.95),
+            0 0 50px rgba(255,0,0,0.9);
+
+        text-shadow:
+            0 0 5px #fff,
+            0 0 12px #ff1a1a,
+            0 0 24px #ff0000,
+            0 0 40px #ff0000;
+    }
+}
+
+/* gerakan halus */
+@keyframes glowFloat{
+
+    0%{
+        transform:translateY(0px) scale(1);
+    }
+
+    50%{
+        transform:translateY(-2px) scale(1.01);
+    }
+
+    100%{
+        transform:translateY(0px) scale(1);
+    }
+}
