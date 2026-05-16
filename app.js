@@ -385,31 +385,73 @@ if(!masihAda){
 
 }
 
-   // ===== KHUSUS WIN2 =====
+  // ===== KHUSUS WIN2 =====
 
 // jika judul dicentang
 if(selectedJudulWin2.includes(judul)){
 
-    // 🔥 HAPUS PERMANEN FIREBASE
-    db.child(judul)
-.child(String(kode).trim())
-.remove()
-.then(()=>{
+    // 🔥 HAPUS SEMUA KODE SAMA DI SEMUA JUDUL YANG DICENTANG
+    db.once("value", allSnap=>{
 
-    console.log("DATA DIHAPUS:", kode);
+        let allData = allSnap.val() || {};
 
-    // 🔥 HAPUS TABEL HTML
-    hapusRowKantong(kode);
+        Object.keys(allData).forEach(jdl=>{
 
-    // 🔥 KOSONGKAN STATUS SCAN
-    setTimeout(()=>{
+            // hanya judul yg dicentang
+            if(!selectedJudulWin2.includes(jdl)){
+                return;
+            }
+
+            // kalau ada kode sama
+            if(
+                allData[jdl] &&
+                allData[jdl][String(kode).trim()]
+            ){
+
+                db.child(jdl)
+                .child(String(kode).trim())
+                .remove();
+
+                console.log(
+                    "DATA DIHAPUS:",
+                    kode,
+                    "DARI:",
+                    jdl
+                );
+            }
+
+        });
+
+        // 🔥 HAPUS TABEL HTML
+        hapusRowKantong(kode);
+
+       // 🔥 CEK DARI statusText LANGSUNG
+let delay = normalizeStatus(statusText).includes("TOLAK")
+    ? 10000
+    : 1500;
+
+setTimeout(()=>{
+
+    // 🔥 jangan hapus kalau masih ada status baru
+    let currentStatus =
+        document.getElementById("status").innerText;
+
+    if(
+        normalizeStatus(currentStatus)
+        .includes(normalizeStatus(kode))
+    ){
         document.getElementById("status").innerHTML = "";
-    },1500);
+    }
 
-    // 🔥 UPDATE TOTAL
-    updateTotal();
+}, delay);
 
-});
+        // 🔥 UPDATE TOTAL
+        updateTotal();
+
+        // 🔥 REFRESH
+        filterList();
+
+    });
 
 }else{
 
@@ -575,26 +617,68 @@ else{
 // jika judul dicentang
 if(selectedJudulWin2.includes(judul)){
 
-    // 🔥 HAPUS PERMANEN FIREBASE
-    db.child(judul)
-.child(String(decodedText).trim())
-.remove()
-.then(()=>{
+    // 🔥 HAPUS SEMUA KODE SAMA DI SEMUA JUDUL YANG DICENTANG
+    db.once("value", allSnap=>{
 
-    console.log("DATA DIHAPUS:", decodedText);
+        let allData = allSnap.val() || {};
 
-    // 🔥 HAPUS TABEL
-    hapusRowKantong(decodedText);
+        Object.keys(allData).forEach(jdl=>{
 
-    // 🔥 KOSONGKAN STATUS LAMA
-    setTimeout(()=>{
+            // hanya judul yg dicentang
+            if(!selectedJudulWin2.includes(jdl)){
+                return;
+            }
+
+            // kalau ada kode sama
+            if(
+                allData[jdl] &&
+                allData[jdl][String(decodedText).trim()]
+            ){
+
+                db.child(jdl)
+                .child(String(decodedText).trim())
+                .remove();
+
+                console.log(
+                    "DATA DIHAPUS:",
+                    decodedText,
+                    "DARI:",
+                    jdl
+                );
+            }
+
+        });
+
+        // 🔥 HAPUS TABEL
+        hapusRowKantong(decodedText);
+
+       // 🔥 CEK DARI statusText LANGSUNG
+let delay = normalizeStatus(statusText).includes("TOLAK")
+    ? 10000
+    : 1500;
+
+setTimeout(()=>{
+
+    // 🔥 jangan hapus kalau masih ada status baru
+    let currentStatus =
+        document.getElementById("status").innerText;
+
+    if(
+        normalizeStatus(currentStatus)
+        .includes(normalizeStatus(kode))
+    ){
         document.getElementById("status").innerHTML = "";
-    },1500);
+    }
 
-    // 🔥 UPDATE TOTAL
-    updateTotal();
+}, delay);
 
-});
+        // 🔥 UPDATE TOTAL
+        updateTotal();
+
+        // 🔥 REFRESH
+        filterList();
+
+    });
 
 }else{
 
@@ -1166,9 +1250,23 @@ function tampilkanStatusScan(kode, statusText){
 
     document.body.classList.add("mega-shake-red");
 
+    if(isWin2){
+
     setTimeout(function(){
+
         document.body.classList.remove("mega-shake-red");
+
+    }, 8000);
+
+}else{
+
+    setTimeout(function(){
+
+        document.body.classList.remove("mega-shake-red");
+
     }, 3000);
+
+}
 }
 
     else if(statusFix === "TIDAK ADA"){
