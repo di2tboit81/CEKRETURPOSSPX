@@ -309,40 +309,114 @@ function manualCheckPetugas() {
 if(judulDipilih === "all" && mode === "readonly"){
 
 
-    db.once("value", snap=>{
+    db.once("value", async snap=>{
         var data = snap.val();
         var ditemukan = false;
 
         if(data){
             for(var judul in data){
-                if(data[judul] && data[judul][String(kode).trim()]){
+                let item = data[judul]
+    ? data[judul][String(kode).trim()]
+    : null;
+
+// 🔥 pastikan benar-benar masih ada
+if(
+    item &&
+    typeof item === "object" &&
+    Object.keys(item).length > 0
+){
+
+   // 🔥 CEK APAKAH MASIH ADA DI FIREBASE
+let masihAda = false;
+
+await db.child(judul).child(String(kode).trim())
+.once("value")
+.then(s=>{
+
+    let val = s.val();
+
+    if(
+        val &&
+        typeof val === "object" &&
+        Object.keys(val).length > 0
+    ){
+        masihAda = true;
+    }
+
+});
+
+// kalau sudah hilang → skip
+if(!masihAda){
+    continue;
+}
+	
     ditemukan = true;
 
-    var item = data[judul][String(kode).trim()];
+    
     var mode = sessionStorage.getItem("mode");
     var statusText;
 
     if(mode === "readonly"){
-        statusText = item.status_win2 ? item.status_win2 : "-";
-    } else {
-        statusText = item.status ? item.status : "OK KANTONG DI TERIMA";
+
+    // 🔥 PRIORITAS STATUS ERROR
+    if(
+        item.status &&
+        normalizeStatus(item.status).includes("TOLAK")
+    ){
+        statusText = item.status;
     }
+    else if(
+        item.status_win2 &&
+        normalizeStatus(item.status_win2).includes("TOLAK")
+    ){
+        statusText = item.status_win2;
+    }
+    else{
+        statusText = item.status_win2
+            ? item.status_win2
+            : "OK KANTONG DI TERIMA";
+    }
+
+} else {
+
+    statusText = item.status
+        ? item.status
+        : "OK KANTONG DI TERIMA";
+
+}
 
    // ===== KHUSUS WIN2 =====
 
 // jika judul dicentang
 if(selectedJudulWin2.includes(judul)){
 
-    // kurangi data
-    db.child(judul).child(String(kode).trim()).remove();
+    // 🔥 HAPUS PERMANEN FIREBASE
+    db.child(judul)
+.child(String(kode).trim())
+.remove()
+.then(()=>{
 
-    console.log("DATA DIKURANGI:", judul);
+    console.log("DATA DIHAPUS:", kode);
+
+    // 🔥 HAPUS TABEL HTML
+    hapusRowKantong(kode);
+
+    // 🔥 KOSONGKAN STATUS SCAN
+    setTimeout(()=>{
+        document.getElementById("status").innerHTML = "";
+    },1500);
+
+    // 🔥 UPDATE TOTAL
+    updateTotal();
+
+});
 
 }else{
 
     console.log("TIDAK DIKURANGI:", judul);
 
 }
+
 
 // tampilkan hasil scan
 tampilkanStatusScan(kode, statusText);
@@ -429,27 +503,98 @@ if(judulDipilih === "all" && mode === "readonly"){
 
    
 
-    db.once("value", snap=>{
+    db.once("value", async snap=>{
         var data = snap.val();
         var ditemukan = false;
 
         if(data){
             for(var judul in data){
-                if(data[judul] && data[judul][String(decodedText).trim()]){
+                let item = data[judul]
+    ? data[judul][String(decodedText).trim()]
+    : null;
+
+// 🔥 pastikan data masih ada
+if(
+    item &&
+    typeof item === "object" &&
+    Object.keys(item).length > 0
+){
+
+    // 🔥 CEK APAKAH MASIH ADA DI TABEL
+    // 🔥 CEK APAKAH MASIH ADA DI FIREBASE
+let masihAda = false;
+
+await db.child(judul).child(String(decodedText).trim())
+.once("value")
+.then(s=>{
+
+    let val = s.val();
+
+    if(
+        val &&
+        typeof val === "object" &&
+        Object.keys(val).length > 0
+    ){
+        masihAda = true;
+    }
+
+});
+
+// kalau sudah hilang → skip
+if(!masihAda){
+    continue;
+}
+	
+
                     ditemukan = true;
 
-                    var item = data[judul][decodedText];
-                    var statusText = item.status_win2 ? item.status_win2 : "-";
+                    
+var statusText;
+
+// 🔥 PRIORITAS ERROR TOLAK
+if(
+    item.status &&
+    normalizeStatus(item.status).includes("TOLAK")
+){
+    statusText = item.status;
+}
+else if(
+    item.status_win2 &&
+    normalizeStatus(item.status_win2).includes("TOLAK")
+){
+    statusText = item.status_win2;
+}
+else{
+    statusText = item.status_win2
+        ? item.status_win2
+        : "OK KANTONG DI TERIMA";
+}
 
 // ===== KHUSUS WIN2 =====
 
 // jika judul dicentang
 if(selectedJudulWin2.includes(judul)){
 
-    // kurangi data
-    db.child(judul).child(String(decodedText).trim()).remove();
+    // 🔥 HAPUS PERMANEN FIREBASE
+    db.child(judul)
+.child(String(decodedText).trim())
+.remove()
+.then(()=>{
 
-    console.log("DATA DIKURANGI:", judul);
+    console.log("DATA DIHAPUS:", decodedText);
+
+    // 🔥 HAPUS TABEL
+    hapusRowKantong(decodedText);
+
+    // 🔥 KOSONGKAN STATUS LAMA
+    setTimeout(()=>{
+        document.getElementById("status").innerHTML = "";
+    },1500);
+
+    // 🔥 UPDATE TOTAL
+    updateTotal();
+
+});
 
 }else{
 
@@ -590,27 +735,69 @@ else if(mode === "normal"){
     // ===== REALTIME LIST =====
     ref.on("child_added", function(snap){
 
-        if(filter === "all"){
+    if(filter === "all"){
 
-            var judul = snap.key;
+        var judul = snap.key;
 
-            snap.forEach(child=>{
-                var kode = child.key;
+        snap.forEach(child=>{
 
-                var row = document.createElement("tr");
-                row.innerHTML = "<td>"+kode+"</td><td>"+judul+"</td>";
-                list.appendChild(row);
+            var kode = child.key;
+            var item = child.val();
+
+            // 🔥 skip jika data kosong
+            if(
+                !item ||
+                (typeof item === "object" &&
+                Object.keys(item).length === 0)
+            ){
+                return;
+            }
+
+            // 🔥 KHUSUS WIN2:
+            // jika judul dicentang DAN data sudah hilang → jangan tampilkan lagi
+            if(
+                sessionStorage.getItem("wilayah") === "win2" &&
+                selectedJudulWin2.includes(judul)
+            ){
+                return;
+            }
+
+            // 🔥 jangan duplicate row
+            let sudahAda = false;
+
+            document.querySelectorAll("#listKantong tr").forEach(r=>{
+
+                let td = r.querySelector("td");
+
+                if(td && td.innerText.trim() === kode.trim()){
+                    sudahAda = true;
+                }
+
             });
 
-        } else {
-
-            var kode = snap.key;
+            if(sudahAda) return;
 
             var row = document.createElement("tr");
-            row.innerHTML = "<td>"+kode+"</td><td>"+filter+"</td>";
+
+            row.innerHTML =
+            "<td>"+kode+"</td><td>"+judul+"</td>";
+
             list.appendChild(row);
-        }
-    });
+
+        });
+
+    } else {
+
+        var kode = snap.key;
+
+        var row = document.createElement("tr");
+
+        row.innerHTML =
+        "<td>"+kode+"</td><td>"+filter+"</td>";
+
+        list.appendChild(row);
+    }
+});
 
     ref.on("child_removed", function(){
         filterList();
@@ -959,19 +1146,30 @@ function tampilkanStatusScan(kode, statusText){
         beepSuccess.play();
     }
 
-    else if(statusFix.includes("TOLAK BEA CUKAI")){
+    else if(statusFix.includes("TOLAK")){
+
+    // 🔥 KHUSUS WIN2 → paksa jadi 1 pesan
+    if(isWin2){
 
         htmlOutput += 
-        "<span class='orange-error'>⚠️ ERROR KANTONG DI TOLAK BEA CUKAI</span>";
+        "<span class='orange-error'>⚠️ SATU KANTONG DI TOLAK BC</span>";
 
-        beepBeaCukai.play();
+    }else{
 
-        document.body.classList.add("mega-shake-red");
+        // selain WIN2 tetap normal
+        htmlOutput += 
+        "<span class='orange-error'>⚠️ " + statusText + "</span>";
 
-        setTimeout(function(){
-            document.body.classList.remove("mega-shake-red");
-        }, 5000);
     }
+
+    beepBeaCukai.play();
+
+    document.body.classList.add("mega-shake-red");
+
+    setTimeout(function(){
+        document.body.classList.remove("mega-shake-red");
+    }, 3000);
+}
 
     else if(statusFix === "TIDAK ADA"){
 
@@ -1471,5 +1669,41 @@ function toggleJudulWin2(el){
     }
 
     console.log("JUDUL AKTIF:", selectedJudulWin2);
+
+}
+
+function hapusRowKantong(kode){
+
+    // 🔒 KHUSUS WIN2
+    if(sessionStorage.getItem("wilayah") !== "win2"){
+        return;
+    }
+
+    // 🔒 HANYA SAAT SEMUA DATA
+    if(document.getElementById("filterKantong").value !== "all"){
+        return;
+    }
+
+    let rows = document.querySelectorAll("#listKantong tr");
+
+    rows.forEach(row=>{
+
+        let td = row.querySelector("td");
+
+        if(td && td.innerText.trim() === kode.trim()){
+
+            row.remove();
+
+        }
+
+    });
+
+    // update total
+    updateTotal();
+
+    // 🔥 refresh realtime supaya tidak muncul lagi
+    setTimeout(()=>{
+        filterList();
+    },300);
 
 }
