@@ -944,96 +944,117 @@ user-select: text;
    ULTRA NEON ERROR WIN2
 ========================= */
 
+/* =========================
+   ULTRA MAX NEON ERROR WIN2
+========================= */
+
 .orange-error{
 
     display:inline-block;
 
-    padding:14px 28px;
+    padding:16px 30px;
 
-    font-size:26px;
+    font-size:28px;
     font-weight:900;
 
-    color:#ff4d4d;
+    color:#ffffff;
 
-    background:rgba(255, 0, 0, 0.07);
+    background:
+    linear-gradient(
+        145deg,
+        rgba(120,0,0,0.35),
+        rgba(255,0,0,0.12)
+    );
 
-    border:2px solid rgba(255,0,0,0.85);
+    border:3px solid #ff0000;
 
-    border-radius:18px;
+    border-radius:20px;
 
     text-transform:uppercase;
-    letter-spacing:1.5px;
+    letter-spacing:2px;
 
     text-align:center;
-    line-height:1.5;
+    line-height:1.6;
 
-    backdrop-filter:blur(4px);
+    backdrop-filter:blur(6px);
 
     animation:
-        neonSmooth 1.2s ease-in-out infinite alternate,
-        glowFloat 2.5s ease-in-out infinite;
+        ultraRedNeon 0.7s infinite alternate,
+        dangerFloat 2s ease-in-out infinite;
 
     box-shadow:
-        0 0 8px rgba(255,0,0,0.9),
-        0 0 18px rgba(255,0,0,0.8),
-        0 0 35px rgba(255,0,0,0.7),
-        inset 0 0 12px rgba(255,0,0,0.25);
+        0 0 10px #ff0000,
+        0 0 25px #ff0000,
+        0 0 45px rgba(255,0,0,1),
+        0 0 70px rgba(255,0,0,0.95),
+        0 0 100px rgba(255,0,0,0.85),
+        inset 0 0 20px rgba(255,0,0,0.45);
 
     text-shadow:
-        0 0 3px #fff,
-        0 0 8px #ff1a1a,
-        0 0 16px #ff0000,
-        0 0 28px #ff0000,
-        0 0 45px rgba(255,0,0,0.95);
+        0 0 5px #ffffff,
+        0 0 10px #ffcccc,
+        0 0 20px #ff4d4d,
+        0 0 35px #ff0000,
+        0 0 55px #ff0000,
+        0 0 85px #ff0000;
 
-    transition:all 0.3s ease;
+    transition:all 0.25s ease;
 
-    max-width:92%;
+    max-width:95%;
     word-break:break-word;
 }
 
-/* nyala smooth */
-@keyframes neonSmooth{
+/* ===== NYALA MERAH SUPER TERANG ===== */
+
+@keyframes ultraRedNeon{
 
     from{
-        opacity:0.88;
+
+        opacity:0.9;
 
         box-shadow:
-            0 0 6px rgba(255,0,0,0.7),
-            0 0 14px rgba(255,0,0,0.6),
-            0 0 28px rgba(255,0,0,0.5);
+            0 0 8px #ff0000,
+            0 0 20px rgba(255,0,0,0.9),
+            0 0 40px rgba(255,0,0,0.85),
+            0 0 70px rgba(255,0,0,0.7);
 
         text-shadow:
-            0 0 3px #fff,
-            0 0 8px #ff0000,
-            0 0 18px #ff0000;
+            0 0 4px #fff,
+            0 0 12px #ff4d4d,
+            0 0 25px #ff0000,
+            0 0 40px #ff0000;
     }
 
     to{
+
         opacity:1;
 
         box-shadow:
-            0 0 10px rgba(255,0,0,1),
-            0 0 24px rgba(255,0,0,0.95),
-            0 0 50px rgba(255,0,0,0.9);
+            0 0 15px #ff0000,
+            0 0 35px #ff1a1a,
+            0 0 60px rgba(255,0,0,1),
+            0 0 100px rgba(255,0,0,1),
+            0 0 140px rgba(255,0,0,0.95);
 
         text-shadow:
-            0 0 5px #fff,
-            0 0 12px #ff1a1a,
-            0 0 24px #ff0000,
-            0 0 40px #ff0000;
+            0 0 6px #fff,
+            0 0 18px #ff8080,
+            0 0 35px #ff1a1a,
+            0 0 60px #ff0000,
+            0 0 90px #ff0000;
     }
 }
 
-/* gerakan halus */
-@keyframes glowFloat{
+/* ===== EFEK MELAYANG HALUS ===== */
+
+@keyframes dangerFloat{
 
     0%{
         transform:translateY(0px) scale(1);
     }
 
     50%{
-        transform:translateY(-2px) scale(1.01);
+        transform:translateY(-3px) scale(1.015);
     }
 
     100%{
